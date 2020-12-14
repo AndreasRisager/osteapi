@@ -54,25 +54,23 @@ module.exports = function(app) {
     // update a cheese
     app.patch("/api/v1/cheeses/:id", async function(request, response, next) {
         try {
-            var { name, price, weight, strength, brand } = request.fields;
+            var { name, price, weight, strength, brand} = request.fields;
             var updateObject = {};
 
-            if (name) updateObject = name;
-            if (price) updateObject = price;
-            if (weight) updateObject = weight;
-            if (strength) updateObject = strength;
-            if (brand) updateObject = brand;
+            if (name) updateObject.name = name;
+            if (price) updateObject.price = price;
+            if (weight) updateObject.weight = weight;
+            if (strength) updateObject.strength = strength;
+            if (brand) updateObject.name = brand;
 
             await Cheese.findByIdAndUpdate(request.params.id, updateObject);
-
+            
             var cheese = await Cheese.findById(request.params.id);
 
             response.status(200);
             response.json(cheese);
-
-        // fejlhåndtering
         } catch (error) {
-            return next(error)
+            return next(error);
         }
     });
 
