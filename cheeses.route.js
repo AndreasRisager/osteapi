@@ -23,12 +23,26 @@ module.exports = function(app) {
     // get all cheeses
     app.get("/api/v1/cheeses", async function(request, response, next) {
         // hent oste fra mongoDB
+        var limit = parseInt(request.query.limit) || 5;
+        var offset = parseInt(request.query.offset) || 0;
+
         try {
-            var result = await Cheese.find();
-            response.json(result);
+            var result = await Cheese.find().limit(limit).skip(offset);
+            var count = (await Cheese.find()).length
+
+            var baseUrl = `${request.protocol}://${request.hostname}${request.hostname == "localhost" ? ":" + process.env.PORT : ""}${request.path}`;
+
+            response.json({
+                count,
+                next: offset + limit >= count ? null : baseUrl + "?limit=" + limit + "&offset=" + (offset + limit),
+                previous: offset - limit < 0 ? null : baseUrl + "?limit=" + limit + "&offset=" + (offset - limit),
+                url: `${baseUrl}?limit=${limit}&offset=${offset}`,
+                results: result
+            })
+            
         } catch (error) {
             return next(error)
-        }  
+        }
     });
 
     // get single cheese by id
